@@ -64,9 +64,10 @@ function acp#meetsForSnipmate(context)
   if g:acp_behaviorSnipmateLength < 0
     return 0
   endif
-  let matches = matchlist(a:context, '\(^\|\s\|\<\)\(\u\{' .
-        \                            g:acp_behaviorSnipmateLength . ',}\)$')
-  return !empty(matches) && !empty(s:getMatchingSnipItems(matches[2]))
+  if len(a:context) < g:acp_behaviorSnipmateLength
+    return 0
+  endif
+  return !empty(s:getMatchingSnipItems(a:context))
 endfunction
 
 "
@@ -198,7 +199,7 @@ endfunction
 "
 function acp#completeSnipmate(findstart, base)
   if a:findstart
-    let s:posSnipmateCompletion = len(matchstr(s:getCurrentText(), '.*\U'))
+    let s:posSnipmateCompletion = 0
     return s:posSnipmateCompletion
   endif
   let lenBase = len(a:base)
@@ -238,7 +239,7 @@ function acp#onPopupPost()
           \             : "\<C-p>" . l:autoselect_down)
   endif
   let s:iBehavs += 1
-  if len(s:behavsCurrent) > s:iBehavs 
+  if len(s:behavsCurrent) > s:iBehavs
     call s:setCompletefunc()
     call acp#pum_color_and_map_adaptions(0)
     return printf("\<C-e>%s\<C-r>=acp#onPopupPost()\<CR>",
